@@ -9,7 +9,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchBox, setSearchBox] = useState("");
-
+  const [sortingData, setSortingData] = useState("asc")
   useEffect(() => {
     // Debounce timer for search
     const delayTimer = setTimeout(() => {
@@ -17,10 +17,15 @@ export default function Home() {
         try {
           setLoading(true);
           setError(null);
-
-          const searchApiURLPoint = searchBox
-            ? `https://dummyjson.com/posts/search?q=${searchBox}`
-            : `https://dummyjson.com/posts`;
+          let searchApiURLPoint = `https://dummyjson.com/posts`
+          if (searchBox) {
+            searchApiURLPoint = `https://dummyjson.com/posts/search?q=${searchBox}`
+          } else {
+            searchApiURLPoint = `https://dummyjson.com/posts?sortBy=id&order=${sortingData}`
+          }
+          // const searchApiURLPoint = searchBox
+          //   ? `https://dummyjson.com/posts/search?q=${searchBox}`
+          //   : `https://dummyjson.com/posts`;
 
           const res = await fetch(searchApiURLPoint);
 
@@ -42,7 +47,39 @@ export default function Home() {
     }, 500); // 500ms debounce delay
 
     return () => clearTimeout(delayTimer);
-  }, [searchBox]);
+  }, [searchBox, sortingData]);
+
+  // useEffect(() => {
+  //   const delayTimer = setTimeout(() => {
+  //     const fetchBlogs = async () => {
+  //       try {
+  //         setLoading(true);
+  //         setError(null);
+
+  //         // const searchApiURLPoint = searchBox
+  //         //   ? `https://dummyjson.com/posts/search?q=${searchBox}`
+  //         //   : `https://dummyjson.com/posts`;
+
+  //         const res = await fetch(`https://dummyjson.com/posts?sortBy=title&order=${sortingData}`);
+  //         if (!res.ok) {
+  //           throw new Error(`Failed to fetch blogs: ${res.status}`);
+  //         }
+
+  //         const data = await res.json();
+  //         setBlogs(data.posts || []);
+  //       } catch (err) {
+  //         setError(err.message);
+  //         console.error("Error fetching blogs:", err);
+  //       } finally {
+  //         setLoading(false);
+  //       }
+  //     };
+
+  //     fetchBlogs();
+  //   }, 500); 
+
+  //   return () => clearTimeout(delayTimer);
+  // }, [sortingData]);
 
   const visibleBlogs = blogs.slice(0, visibleData);
   const hasMoreBlogs = blogs.length > visibleBlogs.length;
@@ -55,6 +92,12 @@ export default function Home() {
     setSearchBox(e.target.value);
     setVisibleData(6); // Reset visible data on new search
   };
+
+  // toggole bar 
+  const handleToggle = ()=>{
+    setSortingData((prev) => 
+      (prev == "asc" ? "desc" : "asc"))
+  }
 
   // Loading State
   if (loading && !searchBox) {
@@ -191,7 +234,15 @@ export default function Home() {
             </div>
           )}
         </div>
-
+          {/* Sorting start */}
+          <div className="text-center mb-4">
+            <p className="text-2xl font-medium">Sort By: 
+              <button onClick={handleToggle} className="bg-teal-700 py-2 px-5 rounded ml-[10px] text-white font-2xl cursor-pointer"> 
+                {sortingData === "asc" ? "A to Z" : "Z to A"}
+              </button>
+              </p>
+          </div>
+          {/* Sorting start */}
         {/* Stats Bar */}
         <div className="flex items-center justify-center gap-8 mb-12 flex-wrap">
           <div className="flex items-center gap-2 text-gray-600">
@@ -274,7 +325,7 @@ export default function Home() {
 
                     {/* Title */}
                     <h3 className="font-bold text-2xl text-gray-900 mb-4 line-clamp-2 group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-600 group-hover:to-indigo-600 transition-all duration-300 leading-tight">
-                      {blog.title}
+                     {blog.id}. {blog.title}
                     </h3>
 
                     {/* Description */}
